@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
-#include "GameLogic.h"
-#include "GameView.h"
-#include "MenuView.h"
+#include "logic/GameLogic.h"
+#include "view/GameView.h"
+#include "view/MenuView.h"
 
 using namespace escape;
 

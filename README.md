@@ -115,5 +115,20 @@ Click and drag a platform from the platform bank on the right to the desired loc
 
 If your solution is successful in getting the stolen object into the getaway van without losing all of the object's durability, then you have successfully compelted the level. The next level will not unlock until you have completed the previous level.
 
+## Project Layout
+
+```
+src/
+  main.cpp      entry point and main loop
+  logic/        game state, levels, physics objects, input handling, menus
+  view/         rendering and music (GameView, MenuView)
+  resources/    asset loading and data-path lookup
+third_party/
+  tinyxml2/     XML parser used to read level files
+data/           fonts, textures, audio, level and dialogue XML
+```
+
+Headers sit next to their sources and are included by module path, e.g. `#include "logic/Level.h"`. Code in `logic/` doesn't include anything from `view/`. Adding a `.cpp` file anywhere under `src/` adds it to the build automatically.
+
 ## More Information
 For more information about The Great Escape, please refer to our design document [here](https://docs.google.com/document/d/1-G_kxFBZOB9qA2d1C6jzQYF8fPCAyNPuF-_koAcvBis/edit?usp=sharing).
