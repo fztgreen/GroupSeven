@@ -13,7 +13,7 @@ Build a route from your location and collect special abilities on the way to hel
 **Platform:** Windows, Max OS, Linux
 
 ## Compiling
-The Great Escape utilizes SFML and Box2D. While Box2D is provided, SFML is not. Make sure you download it before you compile. A cmake CMakeLists.txt is included to help you.
+The Great Escape utilizes SFML and Box2D. Box2D (v2.4.1) is downloaded automatically by CMake at configure time (requires CMake 3.14+ and network access on first configure). SFML is not, so make sure you download it before you compile. A cmake CMakeLists.txt is included to help you.
 
 SFML: https://www.sfml-dev.org/download.php
 
