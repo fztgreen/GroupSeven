@@ -13,9 +13,10 @@ Build a route from your location and collect special abilities on the way to hel
 **Platform:** Windows, Max OS, Linux
 
 ## Compiling
-The Great Escape uses [SFML 2](https://www.sfml-dev.org/) for graphics, audio and input, and [Box2D](https://box2d.org/) for physics. Neither is stored in this repository; CMake fetches them for you:
+The Great Escape uses [SFML 2](https://www.sfml-dev.org/) for graphics, audio and input, [Box2D](https://box2d.org/) for physics, and [tinyxml2](https://github.com/leethomason/tinyxml2) to read level files. None of them is stored in this repository; CMake fetches them for you:
 
 - **Box2D** v2.4.1 is always downloaded and built.
+- **tinyxml2** 11.0.0 is always downloaded and built.
 - **SFML**: an installed SFML 2.5+ is used if one is found; otherwise SFML 2.6.2 is downloaded and built (statically linked).
 
 ### Requirements
@@ -123,8 +124,6 @@ src/
   logic/        game state, levels, physics objects, input handling, menus
   view/         rendering and music (GameView, MenuView)
   resources/    asset loading and data-path lookup
-third_party/
-  tinyxml2/     XML parser used to read level files
 data/           fonts, textures, audio, level and dialogue XML
 ```
 

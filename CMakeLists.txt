@@ -110,6 +110,21 @@ FetchContent_Declare(
 )
 ge_fetch_dependency(box2d)
 
+######################################
+# tinyxml2 (downloaded at configure) #
+######################################
+# Was vendored at 7.0.0, whose CMakeLists requires CMake 2.6 and no longer
+# configures with CMake 4; 11.0.0 has a modern build and a tinyxml2:: alias.
+set(tinyxml2_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+  tinyxml2
+  GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
+  GIT_TAG        11.0.0
+  GIT_SHALLOW    TRUE
+)
+ge_fetch_dependency(tinyxml2)
+
 ####################################################
 # SFML 2.x (use installed copy, else download it)  #
 ####################################################
@@ -221,12 +236,6 @@ add_compile_definitions(GE_DATA_DIR="${GE_DATA_DIR}" GE_DATA_DIR_FROM_BIN="${GE_
 install(DIRECTORY data/ DESTINATION "${GE_INSTALL_DATADIR}"
         PATTERN "ReadMeGuide" EXCLUDE)   # README screenshots, not game assets
 
-# Vendored third-party code, built as its own library so the game's sources
-# include it as <tinyxml2.h>. Declared before link_libraries() below, since
-# it doesn't use SFML or Box2D.
-add_library(tinyxml2 STATIC third_party/tinyxml2/tinyxml2.cpp)
-target_include_directories(tinyxml2 PUBLIC ${csci437_SOURCE_DIR}/third_party/tinyxml2)
-
 # box2d and sfml-* targets carry their own include directories.
 link_libraries(box2d sfml-graphics sfml-window sfml-system sfml-audio sfml-network)
 
@@ -245,7 +254,7 @@ add_library(greatEscape_core ${SRC})
 # Headers live next to their sources and are included by module path,
 # e.g. #include "logic/Level.h".
 target_include_directories(greatEscape_core PUBLIC ${csci437_SOURCE_DIR}/src)
-target_link_libraries(greatEscape_core PUBLIC tinyxml2)
+target_link_libraries(greatEscape_core PUBLIC tinyxml2::tinyxml2)
 
 add_executable(greatEscape ${GE_MAIN})
 target_link_libraries(greatEscape PRIVATE greatEscape_core)
