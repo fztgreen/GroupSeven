@@ -227,45 +227,30 @@ link_libraries(box2d sfml-graphics sfml-window sfml-system sfml-audio sfml-netwo
 
 # Collected after the dependencies are added: SFML's own CMake scripts use a
 # variable called SRC, and would otherwise pick up the game's sources.
-# Get CPP files
-file(GLOB SRC src/*cpp)
-
-# Get executable files
-file(GLOB EXECLIST bin/*cpp)
+# All CPP files in 'src' except the entry point go into the game library.
+set(GE_MAIN ${csci437_SOURCE_DIR}/src/main.cpp)
+file(GLOB SRC src/*.cpp)
+list(REMOVE_ITEM SRC ${GE_MAIN})
 
 #######################
 # Set Compile Targets #
 #######################
-# src library (all CPP files in 'src' dir)
-if(NOT SRC STREQUAL "")
-  get_filename_component(LIBNAME ${csci437_SOURCE_DIR} NAME)
-  set(LIBNAME "${LIBNAME}_core")
-  add_library(${LIBNAME} ${SRC})
+add_library(greatEscape_core ${SRC})
+
+add_executable(greatEscape ${GE_MAIN})
+target_link_libraries(greatEscape PRIVATE greatEscape_core)
+
+# sfml-audio on Windows loads OpenAL from openal32.dll at runtime; SFML
+# ships it, so put a copy next to the executable.
+if(WIN32 AND SFML_FETCHED)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(_openal_dll "${sfml_SOURCE_DIR}/extlibs/bin/x64/openal32.dll")
+  else()
+    set(_openal_dll "${sfml_SOURCE_DIR}/extlibs/bin/x86/openal32.dll")
+  endif()
+  add_custom_command(TARGET greatEscape POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_openal_dll}" $<TARGET_FILE_DIR:greatEscape>)
+  install(FILES "${_openal_dll}" DESTINATION "${GE_INSTALL_BINDIR}")
 endif()
 
-# executables (any CPP file in 'bin' dir)
-foreach(EXEC ${EXECLIST})
-  get_filename_component(EXECNAME ${EXEC} NAME_WE)
-  add_executable(${EXECNAME} ${EXEC})
-
-  if(NOT SRC STREQUAL "")
-    target_link_libraries(${EXECNAME} LINK_PUBLIC ${LIBNAME})
-  endif()
-
-  # sfml-audio on Windows loads OpenAL from openal32.dll at runtime; SFML
-  # ships it, so put a copy next to the executable.
-  if(WIN32 AND SFML_FETCHED)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(_openal_dll "${sfml_SOURCE_DIR}/extlibs/bin/x64/openal32.dll")
-    else()
-      set(_openal_dll "${sfml_SOURCE_DIR}/extlibs/bin/x86/openal32.dll")
-    endif()
-    add_custom_command(TARGET ${EXECNAME} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_openal_dll}" $<TARGET_FILE_DIR:${EXECNAME}>)
-    install(FILES "${_openal_dll}" DESTINATION "${GE_INSTALL_BINDIR}")
-  endif()
-
-  install(TARGETS ${EXECNAME} RUNTIME DESTINATION "${GE_INSTALL_BINDIR}")
-
-  message("-- Adding executable: ${EXECNAME}")
-endforeach(EXEC)
+install(TARGETS greatEscape RUNTIME DESTINATION "${GE_INSTALL_BINDIR}")
