@@ -1,7 +1,7 @@
 #ifndef CONTACTLISTENER_H
 #define CONTACTLISTENER_H
 
-#include <Box2D/Box2D.h>
+#include <box2d/box2d.h>
 #include "StolenObject.h"
 #include "Platform.h"
 

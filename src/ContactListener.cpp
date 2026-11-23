@@ -8,14 +8,14 @@ using namespace escape;
 */
 void ContactListener::BeginContact(b2Contact* contact){
   //check if fixture A was a ball
-  void* bodyUserData = contact -> GetFixtureA() -> GetBody() -> GetUserData();
+  void* bodyUserData = reinterpret_cast<void*>( contact -> GetFixtureA() -> GetBody() -> GetUserData().pointer );
   if ( bodyUserData ){
     double yVel = static_cast<StolenObject*> ( bodyUserData ) -> Body -> GetLinearVelocity().y;
     static_cast<StolenObject*> ( bodyUserData ) -> startContact(yVel);
 
   }
 
-  bodyUserData = contact->GetFixtureB()->GetBody()->GetUserData();
+  bodyUserData = reinterpret_cast<void*>( contact->GetFixtureB()->GetBody()->GetUserData().pointer );
   if ( bodyUserData ){
     double yVel = static_cast<StolenObject*> ( bodyUserData ) -> Body -> GetLinearVelocity().y;
     static_cast<StolenObject*> ( bodyUserData ) -> startContact(yVel);

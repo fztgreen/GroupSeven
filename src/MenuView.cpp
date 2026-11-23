@@ -1,4 +1,5 @@
 #include "MenuView.h"
+#include "DataPath.h"
 
 using namespace escape;
 
@@ -18,7 +19,7 @@ MenuView::MenuView(sf::RenderWindow *_App, sf::Font *_font, sf::Texture* _mapTex
  	this -> mapTexture = _mapTexture;
  	this -> levelDot = _levelDot;
 
-	if (!music.openFromFile("../data/MainTheme.wav")){
+	if (!music.openFromFile(dataPath("MainTheme.wav"))){
 	}
 
 	this -> musicPlaying = false;

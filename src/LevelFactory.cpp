@@ -1,4 +1,5 @@
 #include "LevelFactory.h"
+#include "DataPath.h"
 using namespace escape;
 
 LevelFactory::LevelFactory(){}
@@ -10,7 +11,7 @@ LevelFactory::LevelFactory(){}
 Level LevelFactory::makeLevel(int levelToLoad){
   Level level;
   tinyxml2::XMLDocument doc;
-  doc.LoadFile( "../data/GreatEscape.xml" );
+  doc.LoadFile( dataPath("GreatEscape.xml").c_str() );
   //get to element that contains information for current level
   tinyxml2::XMLElement *levelRoot = doc.FirstChildElement("Level");
 
@@ -35,7 +36,7 @@ Level LevelFactory::makeLevel(int levelToLoad){
 */
 LevelSelect::SelectOrb LevelFactory::makeOrbs(int level){
   tinyxml2::XMLDocument doc;
-  doc.LoadFile( "../data/GreatEscape.xml" );
+  doc.LoadFile( dataPath("GreatEscape.xml").c_str() );
 
   //get to element that contains information for current level
   tinyxml2::XMLElement *levelRoot = doc.FirstChildElement("Level");
@@ -92,7 +93,7 @@ void LevelFactory::makePlatforms(Level &level, tinyxml2::XMLElement *levelRoot){
 Dialogue LevelFactory::loadDialogue(int level){
   Dialogue dialogue;
   tinyxml2::XMLDocument doc;
-  doc.LoadFile( "../data/GreatEscape.xml" );
+  doc.LoadFile( dataPath("GreatEscape.xml").c_str() );
 
   //get to element that contains information for current level
   tinyxml2::XMLElement *levelRoot = doc.FirstChildElement("Level");

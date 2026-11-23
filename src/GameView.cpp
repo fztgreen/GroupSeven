@@ -1,4 +1,5 @@
 #include "GameView.h"
+#include "DataPath.h"
 
 using namespace escape;
 
@@ -17,11 +18,11 @@ GameView::GameView(sf::Font* font, sf::Texture* backgroundSprite, sf::Texture* o
   this -> backgroundSpriteSheet = backgroundSprite;
   this -> objectSpriteSheet = objectSprite;
 
-	if (music.openFromFile("../data/GreatEscapeTheiveryTheme.wav")){
+	if (music.openFromFile(dataPath("GreatEscapeTheiveryTheme.wav"))){
 		music.setLoop(true);
 	}
 
-	if (buffer.loadFromFile("../data/thump.wav")){
+	if (buffer.loadFromFile(dataPath("thump.wav"))){
 		thump.setBuffer(buffer);
 	}
 

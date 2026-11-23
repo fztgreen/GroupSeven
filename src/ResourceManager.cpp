@@ -1,4 +1,5 @@
 #include "ResourceManager.h"
+#include "DataPath.h"
 
 using namespace escape;
 
@@ -8,11 +9,11 @@ using namespace escape;
 */
 ResourceManager::ResourceManager(){
 
-	if (!this -> font.loadFromFile("../data/aliensCows.ttf")){}
+	if (!this -> font.loadFromFile(dataPath("aliensCows.ttf"))){}
 	
-	if (!backgroundSpriteSheet.loadFromFile("../data/BackgroundsSpriteSheet.png")) {}
+	if (!backgroundSpriteSheet.loadFromFile(dataPath("BackgroundsSpriteSheet.png"))) {}
 
-	if (!objectSpriteSheet.loadFromFile("../data/StolenObjectsSpriteSheet.png")) {}
+	if (!objectSpriteSheet.loadFromFile(dataPath("StolenObjectsSpriteSheet.png"))) {}
 }
 
 /*

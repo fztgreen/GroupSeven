@@ -39,6 +39,7 @@ void StolenObject::setWorld(b2World* World){
 	b2BodyDef BodyDef;
 	BodyDef.position = b2Vec2(this -> xCoord/SCALE, this -> yCoord/SCALE);
 	BodyDef.type = b2_dynamicBody;
+	BodyDef.userData.pointer = reinterpret_cast<uintptr_t>( this );
 	this -> Body = World -> CreateBody(&BodyDef);
 
 	//Shape is a circle with radius r
@@ -54,7 +55,6 @@ void StolenObject::setWorld(b2World* World){
 
 	this -> Body -> CreateFixture(&FixtureDef);
 	this -> Body -> SetAwake(1);
-	this -> Body -> SetUserData( this );
 
 	this -> health = 10;
 }
