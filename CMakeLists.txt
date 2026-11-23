@@ -80,6 +80,21 @@ endif()
 
 include(FetchContent)
 
+# Download a declared dependency and add it with EXCLUDE_FROM_ALL. Its targets
+# still build when the game links them, but its own install() rules (headers,
+# static libs, CMake package files) are left out of `cmake --install`.
+# (FetchContent_Declare(... EXCLUDE_FROM_ALL) does this too, but needs CMake 3.28.)
+if(POLICY CMP0169)
+  cmake_policy(SET CMP0169 OLD)  # allow FetchContent_Populate(<name>) on CMake 3.30+
+endif()
+macro(ge_fetch_dependency name)
+  FetchContent_GetProperties(${name})
+  if(NOT ${name}_POPULATED)
+    FetchContent_Populate(${name})
+    add_subdirectory(${${name}_SOURCE_DIR} ${${name}_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
+endmacro()
+
 ###################################
 # Box2D (downloaded at configure) #
 ###################################
@@ -93,7 +108,7 @@ FetchContent_Declare(
   GIT_TAG        v2.4.1
   GIT_SHALLOW    TRUE
 )
-FetchContent_MakeAvailable(box2d)
+ge_fetch_dependency(box2d)
 
 ####################################################
 # SFML 2.x (use installed copy, else download it)  #
@@ -162,7 +177,7 @@ else()
     GIT_TAG        2.6.2
     GIT_SHALLOW    TRUE
   )
-  FetchContent_MakeAvailable(sfml)
+  ge_fetch_dependency(sfml)
 endif()
 
 # Applied to the project's own targets declared below (after the fetched
@@ -172,11 +187,41 @@ if(MSVC)
   add_compile_definitions(_USE_MATH_DEFINES)  # M_PI from <cmath>
 endif()
 
-# Where the game loads its assets from (see include/DataPath.h). Absolute, so
-# the game runs from any working directory. Override for a packaged build,
-# e.g. -DGE_DATA_DIR=/usr/share/greatescape
-set(GE_DATA_DIR "${csci437_SOURCE_DIR}/data" CACHE PATH "Directory containing the game's assets")
-add_compile_definitions(GE_DATA_DIR="${GE_DATA_DIR}")
+##################
+# Install layout #
+##################
+# `cmake --install <build> --prefix <dir>` produces a self-contained folder:
+#   Windows:  <dir>/greatEscape.exe, <dir>/openal32.dll, <dir>/data/
+#   Linux:    <dir>/bin/greatEscape, <dir>/share/greatescape/
+# Both are relocatable: the game finds its data relative to the executable.
+include(GNUInstallDirs)
+if(WIN32)
+  set(_ge_bindir_default  ".")
+  set(_ge_datadir_default "data")
+else()
+  set(_ge_bindir_default  "${CMAKE_INSTALL_BINDIR}")
+  set(_ge_datadir_default "${CMAKE_INSTALL_DATADIR}/greatescape")
+endif()
+set(GE_INSTALL_BINDIR  "${_ge_bindir_default}"  CACHE STRING "Install dir for the executable, relative to the prefix")
+set(GE_INSTALL_DATADIR "${_ge_datadir_default}" CACHE STRING "Install dir for the game data, relative to the prefix")
+if(IS_ABSOLUTE "${GE_INSTALL_BINDIR}" OR IS_ABSOLUTE "${GE_INSTALL_DATADIR}")
+  message(FATAL_ERROR "GE_INSTALL_BINDIR and GE_INSTALL_DATADIR must be relative to the install prefix")
+endif()
+# Path from the executable's directory to the data directory, compiled into
+# src/DataPath.cpp so an installed copy finds its assets wherever it is moved.
+file(RELATIVE_PATH GE_DATA_DIR_FROM_BIN "/prefix/${GE_INSTALL_BINDIR}" "/prefix/${GE_INSTALL_DATADIR}")
+if(GE_DATA_DIR_FROM_BIN STREQUAL "")
+  set(GE_DATA_DIR_FROM_BIN ".")
+endif()
+
+# Development fallback: absolute path to the source tree's data/, used when no
+# installed data is found next to the executable (see src/DataPath.cpp).
+set(GE_DATA_DIR "${csci437_SOURCE_DIR}/data" CACHE PATH "Directory the game loads assets from when not installed")
+add_compile_definitions(GE_DATA_DIR="${GE_DATA_DIR}" GE_DATA_DIR_FROM_BIN="${GE_DATA_DIR_FROM_BIN}")
+
+install(DIRECTORY data/ DESTINATION "${GE_INSTALL_DATADIR}"
+        PATTERN "ReadMeGuide" EXCLUDE)   # README screenshots, not game assets
+
 # box2d and sfml-* targets carry their own include directories.
 link_libraries(box2d sfml-graphics sfml-window sfml-system sfml-audio sfml-network)
 
@@ -217,7 +262,10 @@ foreach(EXEC ${EXECLIST})
     endif()
     add_custom_command(TARGET ${EXECNAME} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_openal_dll}" $<TARGET_FILE_DIR:${EXECNAME}>)
+    install(FILES "${_openal_dll}" DESTINATION "${GE_INSTALL_BINDIR}")
   endif()
+
+  install(TARGETS ${EXECNAME} RUNTIME DESTINATION "${GE_INSTALL_BINDIR}")
 
   message("-- Adding executable: ${EXECNAME}")
 endforeach(EXEC)

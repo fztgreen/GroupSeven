@@ -31,6 +31,23 @@ sudo apt install build-essential cmake git pkg-config \
   libfreetype-dev libopenal-dev libflac-dev libogg-dev libvorbis-dev
 ```
 
+The built game finds its assets on its own, so it can be run from any directory.
+
+### Making a distributable copy
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+cmake --install build --config Release --prefix GreatEscape
+```
+
+This creates a self-contained `GreatEscape/` folder that can be moved or zipped:
+
+- **Windows:** `greatEscape.exe`, `openal32.dll` and `data/`
+- **Linux:** `bin/greatEscape` and `share/greatescape/` (the system libraries SFML uses, e.g. X11/OpenGL/OpenAL, must be present on the target machine)
+
+The layout can be changed with `-DGE_INSTALL_BINDIR=...` and `-DGE_INSTALL_DATADIR=...` (both relative to the prefix).
+
 SFML: https://www.sfml-dev.org/download.php
 
 ## How To Play
