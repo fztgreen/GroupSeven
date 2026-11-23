@@ -110,6 +110,21 @@ FetchContent_Declare(
 )
 ge_fetch_dependency(box2d)
 
+######################################
+# tinyxml2 (downloaded at configure) #
+######################################
+# Was vendored at 7.0.0, whose CMakeLists requires CMake 2.6 and no longer
+# configures with CMake 4; 11.0.0 has a modern build and a tinyxml2:: alias.
+set(tinyxml2_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+  tinyxml2
+  GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
+  GIT_TAG        11.0.0
+  GIT_SHALLOW    TRUE
+)
+ge_fetch_dependency(tinyxml2)
+
 ####################################################
 # SFML 2.x (use installed copy, else download it)  #
 ####################################################
@@ -182,7 +197,6 @@ endif()
 
 # Applied to the project's own targets declared below (after the fetched
 # dependencies, so they don't inherit these settings).
-include_directories(${csci437_SOURCE_DIR}/include)
 if(MSVC)
   add_compile_definitions(_USE_MATH_DEFINES)  # M_PI from <cmath>
 endif()
@@ -208,14 +222,14 @@ if(IS_ABSOLUTE "${GE_INSTALL_BINDIR}" OR IS_ABSOLUTE "${GE_INSTALL_DATADIR}")
   message(FATAL_ERROR "GE_INSTALL_BINDIR and GE_INSTALL_DATADIR must be relative to the install prefix")
 endif()
 # Path from the executable's directory to the data directory, compiled into
-# src/DataPath.cpp so an installed copy finds its assets wherever it is moved.
+# src/resources/DataPath.cpp so an installed copy finds its assets wherever it is moved.
 file(RELATIVE_PATH GE_DATA_DIR_FROM_BIN "/prefix/${GE_INSTALL_BINDIR}" "/prefix/${GE_INSTALL_DATADIR}")
 if(GE_DATA_DIR_FROM_BIN STREQUAL "")
   set(GE_DATA_DIR_FROM_BIN ".")
 endif()
 
 # Development fallback: absolute path to the source tree's data/, used when no
-# installed data is found next to the executable (see src/DataPath.cpp).
+# installed data is found next to the executable (see src/resources/DataPath.cpp).
 set(GE_DATA_DIR "${csci437_SOURCE_DIR}/data" CACHE PATH "Directory the game loads assets from when not installed")
 add_compile_definitions(GE_DATA_DIR="${GE_DATA_DIR}" GE_DATA_DIR_FROM_BIN="${GE_DATA_DIR_FROM_BIN}")
 
@@ -227,15 +241,20 @@ link_libraries(box2d sfml-graphics sfml-window sfml-system sfml-audio sfml-netwo
 
 # Collected after the dependencies are added: SFML's own CMake scripts use a
 # variable called SRC, and would otherwise pick up the game's sources.
-# All CPP files in 'src' except the entry point go into the game library.
+# Every CPP file under src/ (logic/, view/, resources/) except the entry point
+# goes into the game library.
 set(GE_MAIN ${csci437_SOURCE_DIR}/src/main.cpp)
-file(GLOB SRC src/*.cpp)
+file(GLOB_RECURSE SRC CONFIGURE_DEPENDS src/*.cpp)
 list(REMOVE_ITEM SRC ${GE_MAIN})
 
 #######################
 # Set Compile Targets #
 #######################
 add_library(greatEscape_core ${SRC})
+# Headers live next to their sources and are included by module path,
+# e.g. #include "logic/Level.h".
+target_include_directories(greatEscape_core PUBLIC ${csci437_SOURCE_DIR}/src)
+target_link_libraries(greatEscape_core PUBLIC tinyxml2::tinyxml2)
 
 add_executable(greatEscape ${GE_MAIN})
 target_link_libraries(greatEscape PRIVATE greatEscape_core)

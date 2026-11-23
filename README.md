@@ -13,9 +13,10 @@ Build a route from your location and collect special abilities on the way to hel
 **Platform:** Windows, Max OS, Linux
 
 ## Compiling
-The Great Escape uses [SFML 2](https://www.sfml-dev.org/) for graphics, audio and input, and [Box2D](https://box2d.org/) for physics. Neither is stored in this repository; CMake fetches them for you:
+The Great Escape uses [SFML 2](https://www.sfml-dev.org/) for graphics, audio and input, [Box2D](https://box2d.org/) for physics, and [tinyxml2](https://github.com/leethomason/tinyxml2) to read level files. None of them is stored in this repository; CMake fetches them for you:
 
 - **Box2D** v2.4.1 is always downloaded and built.
+- **tinyxml2** 11.0.0 is always downloaded and built.
 - **SFML**: an installed SFML 2.5+ is used if one is found; otherwise SFML 2.6.2 is downloaded and built (statically linked).
 
 ### Requirements
@@ -114,6 +115,19 @@ Click and drag a platform from the platform bank on the right to the desired loc
 ![levelone](/data/ReadMeGuide/LevelOnePlay.png)
 
 If your solution is successful in getting the stolen object into the getaway van without losing all of the object's durability, then you have successfully compelted the level. The next level will not unlock until you have completed the previous level.
+
+## Project Layout
+
+```
+src/
+  main.cpp      entry point and main loop
+  logic/        game state, levels, physics objects, input handling, menus
+  view/         rendering and music (GameView, MenuView)
+  resources/    asset loading and data-path lookup
+data/           fonts, textures, audio, level and dialogue XML
+```
+
+Headers sit next to their sources and are included by module path, e.g. `#include "logic/Level.h"`. Code in `logic/` doesn't include anything from `view/`. Adding a `.cpp` file anywhere under `src/` adds it to the build automatically.
 
 ## More Information
 For more information about The Great Escape, please refer to our design document [here](https://docs.google.com/document/d/1-G_kxFBZOB9qA2d1C6jzQYF8fPCAyNPuF-_koAcvBis/edit?usp=sharing).
